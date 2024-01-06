@@ -426,17 +426,17 @@ def config_parser():
                         help='experiment name')
     parser.add_argument("--basedir", type=str, default='./logs/', 
                         help='where to store ckpts and logs')
-    parser.add_argument("--datadir", type=str, default='./data/llff/fern', 
+    parser.add_argument("--datadir", type=str, default='./data/nerf_synthetic/lego', 
                         help='input data directory')
 
     # training options
     parser.add_argument("--netdepth", type=int, default=8, 
                         help='layers in network')
-    parser.add_argument("--netwidth", type=int, default=128, # 256
+    parser.add_argument("--netwidth", type=int, default=256, # 256
                         help='channels per layer')
     parser.add_argument("--netdepth_fine", type=int, default=8, 
                         help='layers in fine network')
-    parser.add_argument("--netwidth_fine", type=int, default=128, # 256
+    parser.add_argument("--netwidth_fine", type=int, default=256, # 256
                         help='channels per layer in fine network')
     parser.add_argument("--N_rand", type=int, default=32*32*4, 
                         help='batch size (number of random rays per gradient step)')
@@ -444,9 +444,9 @@ def config_parser():
                         help='learning rate')
     parser.add_argument("--lrate_decay", type=int, default=250, 
                         help='exponential learning rate decay (in 1000 steps)')
-    parser.add_argument("--chunk", type=int, default=1024*32, # 32
+    parser.add_argument("--chunk", type=int, default=1024*8, # 32
                         help='number of rays processed in parallel, decrease if running out of memory')
-    parser.add_argument("--netchunk", type=int, default=1024*64, # 64 
+    parser.add_argument("--netchunk", type=int, default=1024*8, # 64 
                         help='number of pts sent through network in parallel, decrease if running out of memory')
     parser.add_argument("--no_batching", action='store_true', 
                         help='only take random rays from 1 image at a time')
@@ -538,7 +538,7 @@ def train():
     if args.dataset_type == 'blender':
         images, poses, render_poses, hwf, i_split = load_blender_data(args.datadir, args.half_res, args.testskip)
         print('Loaded blender', images.shape, render_poses.shape, hwf, args.datadir)
-        i_train, i_val, i_test = i_split
+        i_train, i_test = i_split
 
         near = 2.
         far = 6.
@@ -647,7 +647,7 @@ def train():
     print('Begin')
     print('TRAIN views are', i_train)
     print('TEST views are', i_test)
-    print('VAL views are', i_val)
+    #print('VAL views are', i_val)
 
     # Summary writers
     # writer = SummaryWriter(os.path.join(basedir, 'summaries', expname))
@@ -818,8 +818,11 @@ def train():
 
 
 if __name__=='__main__':
-    #torch.set_default_tensor_type('torch.cuda.FloatTensor')
-
+    torch.set_default_tensor_type('torch.cuda.FloatTensor')
+    #torch.set_default_device("cuda")
+    #torch.cuda.set_device(0)
+    #torch.set_default_dtype(torch.float32)
+    
     train()
 
 
